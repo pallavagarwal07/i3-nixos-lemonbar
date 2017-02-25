@@ -2,15 +2,24 @@
 # Battery statistics command for i3 Lemonbar
 
 # Get battery percentage
-CAPACITY=$(cat /sys/class/power_supply/BAT1/capacity) # Charged percentage
+i=0
+while [ "$i" -lt 10 ]; do
+    if [ -d /sys/class/power_supply/BAT${i} ]; then
+        DIR='/sys/class/power_supply/BAT'$i
+        break
+    fi
+    i=$((i+1))
+done
+
+CAPACITY=$(cat $DIR/capacity) # Charged percentage
 
 # Get charging status
 CHARGING="D"
 
-if [[ `cat /sys/class/power_supply/BAT1/status` == *"Charging"* ]]; then
+if [[ `cat $DIR/status` == *"Charging"* ]]; then
   CHARGING="C"
 fi
-if [[ `cat /sys/class/power_supply/BAT1/status` == *"Full"* ]]; then
+if [[ `cat $DIR/status` == *"Full"* ]]; then
   CHARGING="C"
 fi
 
