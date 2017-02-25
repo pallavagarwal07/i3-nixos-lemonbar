@@ -122,17 +122,34 @@ while read -r line ; do
     WSP*)
       # I3 Workspaces
       wsp="%{F${color_fglight} B${color_bgdark} T1}"
-      set -- ${line#???}
+      set -- "${line#???}"
+      echo "set to '$1' from '$line'" >> ~/log
       while [ $# -gt 0 ] ; do
         case $1 in
          FOC*)
-           wsp="${wsp}%{+u B${color_bgdarkhl} U${color_accent1} T1}   ${1##????}   %{-u B${color_bgdark} F${color_fglight}}"
+           cut="${1##???}"
+           echo "cut is '$cut' from '$1'" >> ~/log
+           rst="${cut%%FOC*}"
+           rst="${rst%%INA*}"
+           rst="${rst%%URG*}"
+           rst="${rst%%ACT*}"
+           wsp="${wsp}%{+u B${color_bgdarkhl} U${color_accent1} T1}   ${rst}   %{-u B${color_bgdark} F${color_fglight}}"
            ;;
          INA*|URG*|ACT*)
-           wsp="${wsp}%{F${color_fglight} T1}   ${1##????}   "
+           cut="${1##???}"
+           echo "cut is '$cut' from '$1'" >> ~/log
+           rst="${cut%%FOC*}"
+           rst="${rst%%INA*}"
+           rst="${rst%%URG*}"
+           rst="${rst%%ACT*}"
+           wsp="${wsp}%{F${color_fglight} T1}   ${rst}   "
            ;;
         esac
-        shift
+        set -- "$(echo "$cut" | sed -r "s/$rst//g")"
+        if [ "$1" = "" ]; then
+            set --
+        fi
+        echo "set to '$1' from '$cut' when rest was ${rst}" >> ~/log
       done
       ;;
       
